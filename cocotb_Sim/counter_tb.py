@@ -1,28 +1,14 @@
 import cocotb
-from cocotb.clock import clock
-from cocotb.triggers import Timer, RisingEdge, ReadOnly
-from cocotb.result import TestFailure, ReturnValue
+from cocotb.triggers import Timer
+from cocotb.clock import Clock
 
-
-''' Device under test ports:
-
-    clock   : in  : std_logic
-    reset   : in  : std_logic
-    up_down : in  : std_logic
-    counter : out : std_logic_vector(3 downto 0)
-
-''' 
+@cocotb.coroutine
+def reset_dut(reset_n, duration):
+	reset_n <= 0
+	yield Timer(duration)
+	reset_n <= 1
+	reset_n._log.debut("Reset complete")
 
 @cocotb.test()
 def my_first_test(dut):
-    """ Try accessing the design. """
-
-    dut._log.info("Running test!")
-    for cycle in range(10):
-        dut.clock = 0
-        yield Timer(1000)
-        dut.clock = 1
-        yield Timer(1000)
-    dut._log.info("Running test!")
-
-
+	cocotb.fork(Clock(dut.clock, 20, units='ns').start())
